@@ -1,0 +1,64 @@
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+}
+
+@layer theme {
+  @theme {
+    --font-sans: "Nunito";
+    --font-rounded: "Nunito";
+
+    --color-primary-50: #f7f3ff;
+    --color-primary-100: #ede5ff;
+    --color-primary-400: #8b5cf6;
+    --color-primary-500: #6c32d9;
+    --color-primary-600: #5821c7;
+    --color-navy-700: #33335c;
+    --color-navy-900: #17174a;
+    --color-gray-200: #e5e5ef;
+    --color-gray-500: #8b8ba3;
+    --color-success: #59c83f;
+    --color-info: #2588f5;
+    --color-warning: #ffb51b;
+    --color-orange: #ff8a16;
+    --color-pink: #f4478f;
+    --color-danger: #ef476f;
+    --color-math: #2588f5;
+    --color-science: #69c93d;
+    --color-bahasa: #ff9e28;
+    --color-english: #f4478f;
+
+    --radius-card: 20px;
+    --radius-control: 16px;
+
+    --text-display: 36px;
+    --text-display--line-height: 42px;
+    --text-h1: 30px;
+    --text-h1--line-height: 36px;
+    --text-h2: 26px;
+    --text-h2--line-height: 32px;
+    --text-h3: 22px;
+    --text-h3--line-height: 28px;
+    --text-body-lg: 18px;
+    --text-body-lg--line-height: 27px;
+    --text-body: 16px;
+    --text-body--line-height: 24px;
+    --text-button: 17px;
+    --text-button--line-height: 22px;
+    --text-label: 14px;
+    --text-label--line-height: 19px;
+    --text-caption: 12px;
+    --text-caption--line-height: 16px;
+  }
+}
+
+@layer utilities {
+  .shadow-card {
+    box-shadow: 0 8px 24px rgb(23 23 74 / 0.09);
+  }
+
+  .shadow-button {
+    box-shadow: 0 6px 14px rgb(88 33 199 / 0.25);
+  }
+}
