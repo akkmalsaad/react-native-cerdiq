@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { Href, router } from "expo-router";
 import { Pressable, ScrollView, useWindowDimensions, View } from "react-native";
 
 const DESIGN_WIDTH = 852;
@@ -44,7 +44,7 @@ export function OnboardingScreen() {
           accessibilityLabel="Mula sekarang"
           accessibilityRole="button"
           hitSlop={4}
-          onPress={() => router.push("/login")}
+          onPress={() => router.push("/sign-up" as Href)}
           style={({ pressed }) => ({
             height: designY(1711) - designY(1605),
             left: designX(177),
