@@ -1,10 +1,12 @@
+import { useAuth, useSignUp, useSSO } from "@clerk/expo";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useRef, useState } from "react";
 import {
   Keyboard,
   KeyboardAvoidingView,
+  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -38,6 +40,9 @@ const inputTextStyle = {
 } as const;
 
 export function SignUpScreen() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const { signUp, fetchStatus } = useSignUp();
+  const { startSSOFlow } = useSSO();
   const { height, width } = useWindowDimensions();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -74,8 +79,66 @@ export function SignUpScreen() {
     setVerificationVisible(true);
   };
 
-  const handleRegister = () => {
+  if (!isLoaded) return null;
+  if (isSignedIn) return <Redirect href="/" />;
+
+  const getErrorMessage = (error: unknown) => {
+    if (typeof error === "object" && error && "errors" in error) {
+      const errors = (error as { errors?: Array<{ longMessage?: string; message?: string }> }).errors;
+      return errors?.[0]?.longMessage ?? errors?.[0]?.message ?? "Sila cuba lagi.";
+    }
+    return "Sila cuba lagi.";
+  };
+
+  const splitName = () => {
+    const parts = fullName.trim().split(/\s+/).filter(Boolean);
+    return { firstName: parts[0] ?? "", lastName: parts.slice(1).join(" ") || parts[0] || "" };
+  };
+
+  const handleRegister = async () => {
+    if (!fullName.trim() || !email.trim() || !password) {
+      Alert.alert("Maklumat belum lengkap", "Masukkan nama penuh, e-mel dan kata laluan anda.");
+      return;
+    }
+
+    const { error } = await signUp.password({ emailAddress: email.trim(), password });
+    if (error) {
+      Alert.alert("Pendaftaran tidak berjaya", getErrorMessage(error));
+      return;
+    }
+
+    const { error: nameError } = await signUp.update(splitName());
+    if (nameError) {
+      Alert.alert("Nama tidak dapat disimpan", getErrorMessage(nameError));
+      return;
+    }
+
+    const { error: sendError } = await signUp.verifications.sendEmailCode();
+    if (sendError) {
+      Alert.alert("Kod tidak dapat dihantar", getErrorMessage(sendError));
+      return;
+    }
     showVerificationModal();
+  };
+
+  const verifyCode = async (code: string) => {
+    const { error } = await signUp.verifications.verifyEmailCode({ code });
+    if (error) {
+      Alert.alert("Kod tidak sah", getErrorMessage(error));
+      return;
+    }
+    if (signUp.status === "complete") {
+      await signUp.finalize({
+        navigate: ({ session }) => {
+          if (session?.currentTask) {
+            Alert.alert("Tindakan diperlukan", "Sila lengkapkan tindakan keselamatan akaun anda.");
+            return;
+          }
+          setVerificationVisible(false);
+          router.replace("/");
+        },
+      });
+    }
   };
 
   const handleVerificationCodeChange = (value: string) => {
@@ -84,10 +147,25 @@ export function SignUpScreen() {
 
     if (numericCode.length === VERIFICATION_CODE_LENGTH) {
       Keyboard.dismiss();
-      setVerificationVisible(false);
-      router.replace("/");
+      void verifyCode(numericCode);
     }
   };
+
+  const handleSocial = async (strategy: "oauth_google" | "oauth_apple") => {
+    try {
+      const { createdSessionId, setActive, signUp: socialSignUp } = await startSSOFlow({ strategy });
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        router.replace("/");
+      } else if (socialSignUp?.status === "missing_requirements") {
+        Alert.alert("Maklumat diperlukan", "Akaun sosial ini memerlukan maklumat tambahan sebelum boleh digunakan.");
+      }
+    } catch (error) {
+      Alert.alert("Pendaftaran sosial tidak berjaya", getErrorMessage(error));
+    }
+  };
+
+  const busy = fetchStatus === "fetching";
 
   return (
     <KeyboardAvoidingView behavior={process.env.EXPO_OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
@@ -151,7 +229,7 @@ export function SignUpScreen() {
             onBlur={() => setFocusedField(null)}
             onChangeText={setPassword}
             onFocus={() => setFocusedField("password")}
-            onSubmitEditing={handleRegister}
+            onSubmitEditing={() => void handleRegister()}
             placeholder={focusedField === "password" ? "" : "Kata Laluan"}
             placeholderTextColor="#A9ADC2"
             returnKeyType="done"
@@ -175,17 +253,19 @@ export function SignUpScreen() {
           <Pressable
             accessibilityLabel="Daftar"
             accessibilityRole="button"
-            onPress={handleRegister}
+            disabled={busy}
+            onPress={() => void handleRegister()}
             style={({ pressed }) => [
               boxStyle({ left: 131, right: 722, top: 1265, bottom: 1348 }),
-              { opacity: pressed ? 0.22 : 1 },
+              { opacity: busy ? 0.65 : pressed ? 0.22 : 1 },
             ]}
           />
 
           <Pressable
             accessibilityLabel="Teruskan dengan Google"
             accessibilityRole="button"
-            onPress={showVerificationModal}
+            disabled={busy}
+            onPress={() => void handleSocial("oauth_google")}
             style={({ pressed }) => [
               boxStyle({ left: 131, right: 722, top: 1428, bottom: 1516 }),
               { opacity: pressed ? 0.22 : 1 },
@@ -195,7 +275,8 @@ export function SignUpScreen() {
           <Pressable
             accessibilityLabel="Teruskan dengan Apple"
             accessibilityRole="button"
-            onPress={showVerificationModal}
+            disabled={busy}
+            onPress={() => void handleSocial("oauth_apple")}
             style={({ pressed }) => [
               boxStyle({ left: 131, right: 722, top: 1533, bottom: 1621 }),
               { opacity: pressed ? 0.22 : 1 },
@@ -213,6 +294,8 @@ export function SignUpScreen() {
               { opacity: pressed ? 0.25 : 1 },
             ]}
           />
+
+          <View nativeID="clerk-captcha" />
         </View>
       </ScrollView>
 
@@ -356,6 +439,21 @@ export function SignUpScreen() {
               >
                 Masukkan digit terakhir untuk terus ke halaman utama.
               </Text>
+
+              <Pressable
+                accessibilityLabel="Hantar semula kod pengesahan"
+                accessibilityRole="button"
+                disabled={busy}
+                onPress={async () => {
+                  const { error } = await signUp.verifications.sendEmailCode();
+                  if (error) Alert.alert("Kod tidak dapat dihantar", getErrorMessage(error));
+                }}
+                style={{ paddingVertical: 4 }}
+              >
+                <Text style={{ color: "#7137DC", fontFamily: "Nunito_700Bold", fontSize: 14, textAlign: "center" }}>
+                  Hantar Semula Kod
+                </Text>
+              </Pressable>
             </Pressable>
           </Pressable>
         </KeyboardAvoidingView>
