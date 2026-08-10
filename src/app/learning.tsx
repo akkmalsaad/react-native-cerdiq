@@ -1,2 +1,5 @@
-import { TabPlaceholderScreen } from "@/components/navigation/tab-placeholder-screen";
-export default function LearningScreen() { return <TabPlaceholderScreen activeTab="learning" description="Pilih subjek dan mulakan sesi pembelajaran seterusnya." icon="📚" title="Pelajaran" />; }
+import { MathSubjectScreen } from "@/features/learning/math-subject-screen";
+
+export default function LearningScreen() {
+  return <MathSubjectScreen />;
+}
