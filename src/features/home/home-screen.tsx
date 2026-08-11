@@ -10,6 +10,7 @@ import { images } from "@/lib/images";
 const DESIGN_WIDTH = 853;
 const DESIGN_HEIGHT = 1844;
 const DESIGN_ASPECT_RATIO = DESIGN_WIDTH / DESIGN_HEIGHT;
+const HOME_CONTENT_SHIFT = 20;
 
 type ChildProfile = {
   avatar?: string;
@@ -66,7 +67,7 @@ export function HomeScreen() {
   });
 
   const actions: HomeAction[] = [
-    { accessibilityLabel: "Buka profil", box: { left: 741, right: 829, top: 98, bottom: 188 }, href: "/profile" as Href },
+    { accessibilityLabel: "Buka profil", box: { left: 741, right: 829, top: 132, bottom: 222 }, href: "/profile" as Href },
     ...subjects.map((subject, index) => ({
       accessibilityLabel: `Buka ${subject.name.replace("\n", " ")}`,
       box: { left: 42 + index * 196, right: 226 + index * 196, top: 558, bottom: 803 },
@@ -80,11 +81,6 @@ export function HomeScreen() {
       href: `/learning?topic=${topic.id}` as Href,
     })),
     { accessibilityLabel: `Mula pelan hari ini. ${todayPlan.description}`, box: { left: 72, right: 279, top: 1584, bottom: 1652 }, href: "/learning" as Href },
-    { accessibilityLabel: "Utama", box: { left: 38, right: 175, top: 1710, bottom: 1834 }, href: "/" as Href },
-    { accessibilityLabel: "Pelajaran", box: { left: 177, right: 328, top: 1710, bottom: 1834 }, href: "/learning" as Href },
-    { accessibilityLabel: "Ganjaran", box: { left: 340, right: 509, top: 1681, bottom: 1834 }, href: "/rewards" as Href },
-    { accessibilityLabel: "Kemajuan", box: { left: 522, right: 676, top: 1710, bottom: 1834 }, href: "/progress" as Href },
-    { accessibilityLabel: "Profil", box: { left: 681, right: 825, top: 1710, bottom: 1834 }, href: "/profile" as Href },
   ];
 
   return (
@@ -94,9 +90,10 @@ export function HomeScreen() {
       contentContainerStyle={{ height, width }}
       scrollEnabled={false}
       showsVerticalScrollIndicator={false}
+      style={{ backgroundColor: "#FCFBFF" }}
     >
       <StatusBar backgroundColor="transparent" style="dark" translucent />
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, transform: [{ translateY: -HOME_CONTENT_SHIFT }] }}>
         <Image
           accessibilityLabel="Halaman utama Cerdiq bersama Awi"
           contentFit="cover"
@@ -168,12 +165,40 @@ export function HomeScreen() {
           </Text>
         </View>
 
+        <View
+          pointerEvents="none"
+          style={[
+            boxStyle({ left: 570, right: 840, top: 72, bottom: 195 }),
+            { backgroundColor: "#FCFBFF" },
+          ]}
+        />
+
+        <View
+          pointerEvents="none"
+          style={[
+            boxStyle({ left: 570, right: 840, top: 106, bottom: 229 }),
+            { overflow: "hidden" },
+          ]}
+        >
+          <Image
+            contentFit="fill"
+            source={images.homeScreen}
+            style={{
+              height: renderedHeight,
+              left: -(570 / DESIGN_WIDTH) * renderedWidth,
+              position: "absolute",
+              top: -(72 / DESIGN_HEIGHT) * renderedHeight,
+              width: renderedWidth,
+            }}
+          />
+        </View>
+
         {childProfile?.avatar ? (
           <Image
             accessibilityLabel={`Avatar ${childName}`}
             contentFit="cover"
             source={{ uri: childProfile.avatar }}
-            style={[boxStyle({ left: 748, right: 823, top: 104, bottom: 180 }), { borderRadius: designX(22) - designX(0) }]}
+            style={[boxStyle({ left: 748, right: 823, top: 138, bottom: 214 }), { borderRadius: designX(22) - designX(0) }]}
           />
         ) : null}
 
@@ -182,6 +207,30 @@ export function HomeScreen() {
           style={[
             boxStyle({ left: 642, right: 831, top: 500, bottom: 552 }),
             { backgroundColor: "#FFFFFF" },
+          ]}
+        />
+
+        <View
+          pointerEvents="none"
+          style={[
+            boxStyle({ left: 770, right: 809, top: 1205, bottom: 1293 }),
+            { backgroundColor: "#FFF9FC" },
+          ]}
+        />
+
+        <View
+          pointerEvents="none"
+          style={[
+            boxStyle({ left: 809, right: DESIGN_WIDTH, top: 1205, bottom: 1293 }),
+            { backgroundColor: "#FCFBFF" },
+          ]}
+        />
+
+        <View
+          pointerEvents="none"
+          style={[
+            boxStyle({ left: 0, right: DESIGN_WIDTH, top: 1680, bottom: DESIGN_HEIGHT }),
+            { backgroundColor: "#FCFBFF" },
           ]}
         />
 

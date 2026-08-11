@@ -1,35 +1,120 @@
-import { Href, router } from "expo-router";
+import { Image } from "expo-image";
+import { Href, router, usePathname } from "expo-router";
 import { Pressable, Text, View } from "react-native";
+
+const NAV_ICON_CONTAINER = 32;
+const NAV_ICON_SIZE = 25;
+
+const SPRITE_WIDTH = 1536;
+const SPRITE_HEIGHT = 1024;
+const SPRITE_CROP_SIZE = 230;
+const SPRITE_SCALE = NAV_ICON_SIZE / SPRITE_CROP_SIZE;
 
 type TabId = "home" | "learning" | "rewards" | "progress" | "profile";
 
-const tabs: Array<{ id: TabId; label: string; icon: string; href: string }> = [
-  { id: "home", label: "Utama", icon: "⌂", href: "/" },
-  { id: "learning", label: "Pelajaran", icon: "▣", href: "/learning" },
-  { id: "rewards", label: "Ganjaran", icon: "♛", href: "/rewards" },
-  { id: "progress", label: "Kemajuan", icon: "▥", href: "/progress" },
-  { id: "profile", label: "Profil", icon: "☺", href: "/profile" },
+type Tab = {
+  href: Href;
+  id: TabId;
+  label: string;
+  spriteX: number;
+};
+
+const navigationIcons = require("../../../assets/images/navigation bar icon.png");
+
+const tabs: Tab[] = [
+  { id: "home", label: "Utama", href: "/", spriteX: 165 },
+  { id: "learning", label: "Pelajaran", href: "/learning", spriteX: 470 },
+  { id: "rewards", label: "Ganjaran", href: "/rewards", spriteX: 772 },
+  { id: "progress", label: "Kemajuan", href: "/progress", spriteX: 1075 },
+  { id: "profile", label: "Profil", href: "/profile", spriteX: 1380 },
 ];
 
-export function CerdiqTabBar({ activeTab }: { activeTab: TabId }) {
+const getActiveTab = (pathname: string): TabId => {
+  if (pathname === "/") return "home";
+  if (pathname === "/learning" || pathname.startsWith("/math-year-")) return "learning";
+  if (pathname === "/rewards") return "rewards";
+  if (pathname === "/progress") return "progress";
+  return "profile";
+};
+
+function NavigationIcon({ active, spriteX }: { active: boolean; spriteX: number }) {
+  const spriteY = active ? 650 : 285;
+
   return (
-    <View style={{ backgroundColor: "#FFFFFF", borderRadius: 30, flexDirection: "row", paddingHorizontal: 5, paddingVertical: 7, boxShadow: "0 8px 24px rgba(70, 39, 145, 0.14)" }}>
+    <View
+      style={{
+        alignItems: "center",
+        height: NAV_ICON_CONTAINER,
+        justifyContent: "center",
+        overflow: "hidden",
+        width: NAV_ICON_CONTAINER,
+      }}
+    >
+      <View style={{ height: NAV_ICON_SIZE, overflow: "hidden", width: NAV_ICON_SIZE }}>
+        <Image
+          contentFit="fill"
+          source={navigationIcons}
+          style={{
+            height: SPRITE_HEIGHT * SPRITE_SCALE,
+            left: -(spriteX - SPRITE_CROP_SIZE / 2) * SPRITE_SCALE,
+            position: "absolute",
+            top: -(spriteY - SPRITE_CROP_SIZE / 2) * SPRITE_SCALE,
+            width: SPRITE_WIDTH * SPRITE_SCALE,
+          }}
+        />
+      </View>
+    </View>
+  );
+}
+
+export function CerdiqTabBar() {
+  const pathname = usePathname();
+  const activeTab = getActiveTab(pathname);
+
+  return (
+    <View
+      accessibilityRole="tablist"
+      style={{
+        backgroundColor: "#FFFFFF",
+        borderCurve: "continuous",
+        borderRadius: 30,
+        boxShadow: "0 8px 24px rgba(70, 39, 145, 0.14)",
+        flexDirection: "row",
+        minHeight: 72,
+        paddingHorizontal: 5,
+        paddingVertical: 7,
+      }}
+    >
       {tabs.map((tab) => {
         const active = tab.id === activeTab;
-        const isReward = tab.id === "rewards";
         return (
           <Pressable
             accessibilityLabel={tab.label}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
             key={tab.id}
-            onPress={() => router.replace(tab.href as Href)}
-            style={({ pressed }) => ({ alignItems: "center", flex: 1, gap: 2, opacity: pressed ? 0.65 : 1, transform: isReward ? [{ translateY: -13 }] : undefined })}
+            onPress={() => {
+              if (!active) router.replace(tab.href);
+            }}
+            style={({ pressed }) => ({
+              alignItems: "center",
+              flex: 1,
+              gap: 1,
+              justifyContent: "center",
+              opacity: pressed ? 0.65 : 1,
+            })}
           >
-            <View style={{ alignItems: "center", backgroundColor: isReward ? "#672BD1" : "transparent", borderRadius: 999, height: 38, justifyContent: "center", width: 46, boxShadow: isReward ? "0 5px 12px rgba(89, 32, 195, 0.28)" : undefined }}>
-              <Text style={{ color: isReward ? "#FFFFFF" : active ? "#6528C9" : "#737387", fontFamily: "Nunito_800ExtraBold", fontSize: isReward ? 23 : 25, lineHeight: 28 }}>{tab.icon}</Text>
-            </View>
-            <Text style={{ color: active || isReward ? "#6528C9" : "#626277", fontFamily: "Nunito_700Bold", fontSize: 11 }}>{tab.label}</Text>
+            <NavigationIcon active={active} spriteX={tab.spriteX} />
+            <Text
+              numberOfLines={1}
+              style={{
+                color: active ? "#6528D9" : "#626277",
+                fontFamily: active ? "Nunito_800ExtraBold" : "Nunito_700Bold",
+                fontSize: 11,
+              }}
+            >
+              {tab.label}
+            </Text>
           </Pressable>
         );
       })}

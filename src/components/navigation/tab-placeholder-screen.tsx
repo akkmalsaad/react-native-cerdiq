@@ -1,14 +1,10 @@
 import { useAuth, useUser } from "@clerk/expo";
 import { Redirect } from "expo-router";
 import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { CerdiqTabBar } from "@/components/navigation/cerdiq-tab-bar";
 
 type TabId = "learning" | "rewards" | "progress" | "profile";
 
-export function TabPlaceholderScreen({ activeTab, description, icon, title }: { activeTab: TabId; description: string; icon: string; title: string }) {
-  const insets = useSafeAreaInsets();
+export function TabPlaceholderScreen({ description, icon, title }: { activeTab: TabId; description: string; icon: string; title: string }) {
   const { isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
   const child = user?.unsafeMetadata.childProfile as { name?: string } | undefined;
@@ -19,7 +15,6 @@ export function TabPlaceholderScreen({ activeTab, description, icon, title }: { 
       <Text style={{ fontSize: 64 }}>{icon}</Text>
       <Text selectable style={{ color: "#22175D", fontFamily: "Nunito_800ExtraBold", fontSize: 30, paddingTop: 14 }}>{title}</Text>
       <Text selectable style={{ color: "#6B6782", fontFamily: "Nunito_600SemiBold", fontSize: 16, lineHeight: 24, paddingTop: 8, textAlign: "center" }}>{description.replace("{name}", child?.name ?? "Pelajar")}</Text>
-      <View style={{ bottom: Math.max(insets.bottom, 8), left: 14, position: "absolute", right: 14 }}><CerdiqTabBar activeTab={activeTab} /></View>
     </View>
   );
 }
