@@ -61,10 +61,11 @@ export function MathTopicsScreen({ topics, year }: MathTopicsScreenProps) {
   if (!isSignedIn) return <Redirect href="/login" />;
 
   const openTopic = (topic: MathTopic) => {
-    Alert.alert(
-      topic.locked ? "Topik dikunci" : topic.title,
-      topic.locked ? "Selesaikan topik sebelumnya untuk membuka topik ini." : "Topik ini sedia untuk dimulakan.",
-    );
+    if (topic.locked) {
+      Alert.alert("Topik dikunci", "Selesaikan topik sebelumnya untuk membuka topik ini.");
+      return;
+    }
+    router.push("/lesson");
   };
 
   return (

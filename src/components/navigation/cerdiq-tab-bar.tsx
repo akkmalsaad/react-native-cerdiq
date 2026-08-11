@@ -31,7 +31,7 @@ const tabs: Tab[] = [
 
 const getActiveTab = (pathname: string): TabId => {
   if (pathname === "/") return "home";
-  if (pathname === "/learning" || pathname.startsWith("/math-year-")) return "learning";
+  if (pathname === "/learning" || pathname === "/lesson" || pathname.startsWith("/math-year-")) return "learning";
   if (pathname === "/rewards") return "rewards";
   if (pathname === "/progress") return "progress";
   return "profile";
