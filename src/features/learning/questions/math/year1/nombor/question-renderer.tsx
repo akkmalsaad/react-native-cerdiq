@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
+import { QuizAnswerBox, type QuizBoxState } from "@/features/learning/components/quiz-boxes";
 import type { QuizContentFeedback } from "@/features/learning/quiz/quiz-content-types";
 import { validateAnswer } from "./validate-answer";
 import { CountBlocks } from "./count-blocks";
@@ -39,4 +40,7 @@ export const QuestionRenderer = forwardRef<QuestionRendererHandle, { canvasWidth
 });
 
 function NumberTile({ label, width }: { label: string; width: number }) { return <View style={{ alignItems: "center", backgroundColor: label === "?" ? "#F1ECFF" : "#FAF9FF", borderColor: "#BFAEF2", borderRadius: width * 0.018, borderWidth: 1.5, height: width * 0.09, justifyContent: "center", width: width * 0.1 }}><Text style={{ color: "#17175A", fontFamily: "Nunito_800ExtraBold", fontSize: width * 0.038 }}>{label}</Text></View>; }
-function Choice({ correct, feedback = "idle", label, onPress, selected, width }: { correct?: boolean; feedback?: QuizContentFeedback; label: string; onPress: () => void; selected: boolean; width: number }) { const stateColor = selected && feedback === "correct" && correct ? "#43BF25" : selected && feedback === "wrong" ? "#DE5578" : selected ? "#5621DD" : "#D8D0F0"; return <Pressable accessibilityRole="radio" accessibilityState={{ checked: selected }} onPress={onPress} style={{ alignItems: "center", backgroundColor: selected ? "#F1ECFF" : "#FAF9FF", borderColor: stateColor, borderRadius: width * 0.022, borderWidth: selected ? 2 : 1, height: width * 0.09, justifyContent: "center", width: width * 0.17 }}><Text style={{ color: "#17175A", fontFamily: "Nunito_800ExtraBold", fontSize: width * 0.038 }}>{label}</Text></Pressable>; }
+function Choice({ correct, feedback = "idle", label, onPress, selected, width }: { correct?: boolean; feedback?: QuizContentFeedback; label: string; onPress: () => void; selected: boolean; width: number }) {
+  const state: QuizBoxState = selected && feedback === "correct" && correct ? "correct" : selected && feedback === "wrong" ? "wrong" : selected ? "selected" : "default";
+  return <QuizAnswerBox accessibilityLabel={label} onPress={onPress} selected={selected} state={state} style={{ height: width * 0.15, width: width * 0.17 }}><Text style={{ color: state === "default" ? "#17175A" : "white", fontFamily: "Nunito_800ExtraBold", fontSize: width * 0.038, textAlign: "center" }}>{label}</Text></QuizAnswerBox>;
+}

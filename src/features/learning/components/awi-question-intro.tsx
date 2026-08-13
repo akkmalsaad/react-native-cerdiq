@@ -1,0 +1,7 @@
+import { Image } from "expo-image";
+import { Text, View } from "react-native";
+import { images } from "@/lib/images";
+
+export function AwiQuestionIntro({ message, compact }: { message: string; compact?: boolean }) {
+  return <View style={{ alignItems: "flex-end", flexDirection: "row" }}><View style={{ backgroundColor: "white", borderCurve: "continuous", borderRadius: 22, flex: 1, gap: 2, minHeight: compact ? 72 : 88, paddingHorizontal: 20, paddingVertical: compact ? 10 : 14, boxShadow: "0 8px 22px rgba(34, 11, 102, 0.20)" }}><View style={{ backgroundColor: "white", height: 18, position: "absolute", right: -7, top: 32, transform: [{ rotate: "45deg" }], width: 18 }} /><View style={{ alignItems: "center", backgroundColor: "white", borderRadius: 999, height: 40, justifyContent: "center", left: -13, position: "absolute", top: -17, width: 40, boxShadow: "0 4px 12px rgba(75,31,177,0.20)" }}><Text style={{ fontSize: 21 }}>💡</Text></View><Text style={{ color: "#5422D6", fontFamily: "Nunito_800ExtraBold", fontSize: compact ? 16 : 18 }}>Awi ingin tahu,</Text><Text numberOfLines={2} style={{ color: "#17175A", fontFamily: "Nunito_600SemiBold", fontSize: compact ? 12 : 14, lineHeight: compact ? 16 : 19 }}>{message}</Text></View><Image accessibilityLabel="Awi, maskot Cerdiq" contentFit="contain" source={images.awiDiscover} style={{ height: compact ? 88 : 108, marginLeft: -20, width: compact ? 82 : 100 }} /></View>;
+}

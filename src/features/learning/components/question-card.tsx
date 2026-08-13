@@ -1,0 +1,6 @@
+import { Alert, Pressable, Text, View } from "react-native";
+import type { ReactNode } from "react";
+
+import { QuizQuestionBox } from "./quiz-boxes";
+
+export function QuestionCard({ question, audioText, compact, children }: { question: string; audioText: string; compact?: boolean; children: ReactNode }) { return <View style={{ backgroundColor: "white", borderCurve: "continuous", borderRadius: compact ? 22 : 28, flex: 1, gap: compact ? 7 : 11, minHeight: 0, padding: compact ? 10 : 15, boxShadow: "0 10px 28px rgba(55, 25, 130, 0.18)" }}><QuizQuestionBox style={{ minHeight: compact ? 58 : 68 }}><View style={{ alignItems: "center", flexDirection: "row", gap: 10, paddingHorizontal: compact ? 8 : 12 }}><Pressable accessibilityLabel="Dengar soalan" onPress={() => Alert.alert("Baca soalan", audioText)} style={{ alignItems: "center", backgroundColor: "#F4F0FF", borderRadius: 999, height: compact ? 34 : 40, justifyContent: "center", width: compact ? 34 : 40 }}><Text style={{ fontSize: compact ? 17 : 20 }}>🔊</Text></Pressable><Text numberOfLines={2} selectable style={{ color: "#17175A", flex: 1, fontFamily: "Nunito_800ExtraBold", fontSize: compact ? 16 : 19, lineHeight: compact ? 20 : 24, textAlign: "center" }}>{question}</Text></View></QuizQuestionBox>{children}</View>; }

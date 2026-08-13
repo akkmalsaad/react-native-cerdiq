@@ -2,9 +2,10 @@ import { useAuth } from "@clerk/expo";
 import { Image } from "expo-image";
 import { Redirect, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useRef, useState } from "react";
-import { Alert, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, Animated, Easing, Pressable, Text, useWindowDimensions, View } from "react-native";
 
+import { ConfettiBurst } from "@/features/learning/components/confetti-burst";
 import { generateNomborLesson } from "@/features/learning/questions/math/year1/nombor/generate-nombor-lesson";
 import { QuestionRenderer, type QuestionRendererHandle } from "@/features/learning/questions/math/year1/nombor/question-renderer";
 
@@ -21,6 +22,22 @@ export function LearningScreen() {
   const [canSubmit, setCanSubmit] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>("idle");
   const currentQuestion = questions[questionIndex];
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (feedback === "wrong") {
+      shakeAnim.setValue(0);
+      Animated.sequence([
+        Animated.timing(shakeAnim, { duration: 55, easing: Easing.linear, toValue: 8, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { duration: 55, easing: Easing.linear, toValue: -8, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { duration: 55, easing: Easing.linear, toValue: 6, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { duration: 55, easing: Easing.linear, toValue: -6, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { duration: 55, easing: Easing.linear, toValue: 0, useNativeDriver: true }),
+      ]).start();
+    } else {
+      shakeAnim.setValue(0);
+    }
+  }, [feedback, shakeAnim]);
 
   if (!isLoaded) return null;
   if (!isSignedIn) return <Redirect href="/login" />;
@@ -60,22 +77,28 @@ export function LearningScreen() {
         <View pointerEvents="none" style={{ alignItems: "center", left: "34%", position: "absolute", top: "12.15%", width: "32%" }}><Text style={{ color: "white", fontFamily: "Nunito_700Bold", fontSize: canvasWidth * 0.029 }}>{`Soalan ${questionIndex + 1} / ${questions.length}`}</Text></View>
         <View pointerEvents="none" style={{ alignItems: "center", backgroundColor: "white", height: "4.2%", justifyContent: "center", left: "15%", position: "absolute", top: "33.6%", width: "77%" }}><Text selectable style={{ color: "#17175A", fontFamily: "Nunito_800ExtraBold", fontSize: canvasWidth * 0.035, textAlign: "center" }}>{currentQuestion.prompt}</Text></View><View pointerEvents="none" style={{ backgroundColor: "white", left: "14.8%", minHeight: "5.2%", paddingTop: "0.4%", position: "absolute", top: "22.1%", width: "38%" }}><Text selectable style={{ color: "#17175A", fontFamily: "Nunito_600SemiBold", fontSize: canvasWidth * 0.025 + 2, lineHeight: canvasWidth * 0.035 + 2 }}>{currentQuestion.awiMessage}</Text></View><View pointerEvents="none" style={{ backgroundColor: "#F6F2FF", height: "5.2%", justifyContent: "center", left: "21.2%", position: "absolute", top: "87.2%", width: "34%" }}><Text selectable style={{ color: "#17175A", fontFamily: "Nunito_600SemiBold", fontSize: canvasWidth * 0.018 + 4, lineHeight: canvasWidth * 0.025 + 4 }}>{feedback === "wrong" ? currentQuestion.retryTip : currentQuestion.tip}</Text></View>
 
-        <View style={{ backgroundColor: "white", height: "39.3%", left: "8.3%", position: "absolute", top: "38.3%", width: "83.6%" }}>
+        <Animated.View style={{ backgroundColor: "white", height: "39.3%", left: "8.3%", position: "absolute", top: "38.3%", transform: [{ translateX: shakeAnim }], width: "83.6%" }}>
           <QuestionRenderer canvasWidth={canvasWidth} feedback={feedback} onReadyChange={handleReadyChange} question={currentQuestion} ref={quizContentRef} />
-        </View>
+        </Animated.View>
+
+        {feedback === "correct" ? (
+          <View pointerEvents="none" style={{ left: "8.3%", position: "absolute", top: "56%", width: "83.6%" }}>
+            <ConfettiBurst key={questionIndex} />
+          </View>
+        ) : null}
 
         <Pressable
-          accessibilityLabel={feedback === "wrong" ? "Cuba lagi" : "Semak jawapan"}
+          accessibilityLabel={feedback === "wrong" ? "Cuba lagi" : feedback === "correct" ? "Seterusnya" : "Semak jawapan"}
           accessibilityRole="button"
-          disabled={!canSubmit || feedback === "correct"}
-          onPress={feedback === "wrong" ? () => { quizContentRef.current?.retry(); setFeedback("idle"); } : check}
-          style={({ pressed }) => ({ alignItems: "center", backgroundColor: canSubmit ? "#501BE0" : "#BDBBC4", borderRadius: 999, height: "4.7%", justifyContent: "center", left: "15.4%", opacity: pressed ? 0.8 : 1, position: "absolute", top: "78.2%", width: "68.8%" })}
+          disabled={feedback === "idle" && !canSubmit}
+          onPress={feedback === "wrong" ? () => { quizContentRef.current?.retry(); setFeedback("idle"); } : feedback === "correct" ? continueLesson : check}
+          style={({ pressed }) => ({ alignItems: "center", backgroundColor: feedback === "idle" && !canSubmit ? "#BDBBC4" : "#501BE0", borderRadius: 999, height: "4.7%", justifyContent: "center", left: "15.4%", opacity: pressed ? 0.8 : 1, position: "absolute", top: "78.2%", width: "68.8%" })}
         >
-          <Text style={{ color: "white", fontFamily: "Nunito_800ExtraBold", fontSize: canvasWidth * 0.032, letterSpacing: 0.6 }}>{feedback === "wrong" ? "CUBA LAGI" : "SEMAK JAWAPAN     →"}</Text>
+          <Text style={{ color: "white", fontFamily: "Nunito_800ExtraBold", fontSize: canvasWidth * 0.032, letterSpacing: 0.6 }}>{feedback === "wrong" ? "CUBA LAGI" : feedback === "correct" ? "SETERUSNYA     →" : "SEMAK JAWAPAN     →"}</Text>
         </Pressable>
 
+        <View pointerEvents="none" style={{ backgroundColor: "white", height: "6.3%", left: "49.5%", position: "absolute", top: "93.7%", width: "42.8%" }} />
         <Pressable accessibilityLabel="Mulakan semula" accessibilityRole="button" onPress={reset} style={{ height: "4.8%", left: "7.8%", position: "absolute", top: "94.1%", width: "14.5%" }} />
-        <Pressable accessibilityLabel="Seterusnya" accessibilityRole="button" disabled={feedback !== "correct"} onPress={continueLesson} style={{ alignItems: "center", backgroundColor: feedback === "correct" ? "#501BE0" : "transparent", borderRadius: 999, height: "4.7%", justifyContent: "center", left: "50.5%", position: "absolute", top: "94.1%", width: "40.8%" }}>{feedback === "correct" ? <Text style={{ color: "white", fontFamily: "Nunito_800ExtraBold", fontSize: canvasWidth * 0.029 }}>SETERUSNYA     →</Text> : null}</Pressable>
       </View>
     </View>
   );
