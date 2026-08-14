@@ -1,5 +1,6 @@
 import { generateNomborQuestion } from "./generate-nombor-question";
 import { clearRecentNomborQuestions, generateNomborLesson } from "./generate-nombor-lesson";
+import { numberToMalayWords } from "./number-to-malay-words";
 import type { MathQuestion } from "./types";
 
 function assert(condition: boolean, message: string): asserts condition { if (!condition) throw new Error(message); }
@@ -16,6 +17,15 @@ export function validateNomborQuestion(question: MathQuestion) {
   if (question.type === "ordering") {
     const expected = [...(question.options as number[])].sort((a, b) => (question.answer as number[])[0] < (question.answer as number[]).at(-1)! ? a - b : b - a);
     assert(expected.every((value, index) => value === (question.answer as number[])[index]), "Invalid ordering answer");
+  }
+  if (question.type === "number_spelling") {
+    assert(numberToMalayWords(question.visualData?.number ?? -1) === question.answer, "Number spelling answer does not match numberToMalayWords");
+  }
+  if (question.type === "compare_icons") {
+    const { comparison, leftCount, rightCount } = question.visualData ?? {};
+    assert(leftCount !== undefined && rightCount !== undefined && leftCount !== rightCount, "Compare icon counts must differ");
+    const expectedSide = comparison === "more" ? (leftCount! > rightCount! ? "left" : "right") : (leftCount! < rightCount! ? "left" : "right");
+    assert((expectedSide === "left" ? "Kiri" : "Kanan") === question.answer, "Invalid compare icons answer");
   }
 }
 

@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/expo";
 import { Image } from "expo-image";
-import { Redirect, router } from "expo-router";
+import { Href, Redirect, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Animated, Easing, Pressable, Text, useWindowDimensions, View } from "react-native";
@@ -13,11 +13,11 @@ const learningScreen = require("../../../assets/images/Learning Screen.png");
 
 type Feedback = "idle" | "correct" | "wrong";
 
-export function LearningScreen() {
+export function NumberYear1Screen() {
   const { isLoaded, isSignedIn } = useAuth();
   const { height, width } = useWindowDimensions();
   const quizContentRef = useRef<QuestionRendererHandle>(null);
-  const [questions, setQuestions] = useState(() => generateNomborLesson({ questionCount: 10, difficulty: 1 }));
+  const [questions] = useState(() => generateNomborLesson({ questionCount: 10, difficulty: 1 }));
   const [questionIndex, setQuestionIndex] = useState(0);
   const [canSubmit, setCanSubmit] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>("idle");
@@ -51,11 +51,10 @@ export function LearningScreen() {
   };
   const continueLesson = () => {
     if (questionIndex === questions.length - 1) {
-      setQuestions(generateNomborLesson({ questionCount: 10, difficulty: 1 }));
-      setQuestionIndex(0);
-    } else {
-      setQuestionIndex((current) => current + 1);
+      router.replace("/next-screen" as Href);
+      return;
     }
+    setQuestionIndex((current) => current + 1);
     setCanSubmit(false);
     setFeedback("idle");
   };

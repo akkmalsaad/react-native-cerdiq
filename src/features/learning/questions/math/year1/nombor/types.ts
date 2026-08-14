@@ -4,9 +4,14 @@ export type MathQuestionType =
   | "visual_count"
   | "compare_numbers"
   | "missing_number"
-  | "ordering";
+  | "ordering"
+  | "number_spelling"
+  | "compare_icons";
 
 export type MathQuestionDifficulty = 1 | 2 | 3;
+
+export type CompareIconType = "apple" | "star" | "ball" | "fish" | "flower";
+export const COMPARE_ICON_TYPES: CompareIconType[] = ["apple", "star", "ball", "fish", "flower"];
 
 export type MathQuestion = {
   id: string;
@@ -26,6 +31,11 @@ export type MathQuestion = {
     compareMode?: "larger" | "smaller";
     numbers?: number[];
     missingIndex?: number;
+    number?: number;
+    leftCount?: number;
+    rightCount?: number;
+    comparison?: "more" | "less";
+    iconType?: CompareIconType;
   };
   awiMessage: string;
   tip: string;

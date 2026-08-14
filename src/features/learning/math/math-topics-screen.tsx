@@ -65,7 +65,7 @@ export function MathTopicsScreen({ topics, year }: MathTopicsScreenProps) {
       Alert.alert("Topik dikunci", "Selesaikan topik sebelumnya untuk membuka topik ini.");
       return;
     }
-    router.push("/lesson");
+    router.push("/number-year-1" as Href);
   };
 
   return (
